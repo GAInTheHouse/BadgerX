@@ -9,6 +9,7 @@ Official Repository Maintained By BadgerX team representing The University Of Wi
 - Collin Frink
 - Brian Hu
 - Shreyans Saraogi
+- Jack Cai
 
 ## Mentor:
 
