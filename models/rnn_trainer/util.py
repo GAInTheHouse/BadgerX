@@ -22,7 +22,6 @@ def cross_validation(data, labels, model, n_splits, batch_size, epochs, metrics)
     tss = TimeSeriesSplit(n_splits=n_splits) # make time series split object
     for train_idx, test_idx in tss.split(data, labels): # iterate through train test splits
         #train and validate models
-        print(data[train_idx].shape, labels[train_idx].shape)
         model.fit(data[train_idx], labels[train_idx], batch_size=batch_size, epochs=epochs)
         y_pred = model.predict(data[test_idx], batch_size=batch_size)
         metric_errors = [] # store errors based on each metric

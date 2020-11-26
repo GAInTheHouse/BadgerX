@@ -26,7 +26,6 @@ def train_lr(args):
         if(args.n_units_2 != -1):
             rnn.add(tf.keras.layers.GRU(args.n_units_2, dropout=args.dropout))
     rnn.add(tf.keras.layers.Dense(labels.shape[1]))
-    print(rnn.summary())
     #compile model
     rnn.compile(loss=args.loss, optimizer=args.optimizer)
     #initialize metrics
