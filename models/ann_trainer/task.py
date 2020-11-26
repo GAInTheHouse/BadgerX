@@ -128,12 +128,12 @@ def get_args():
     parser.add_argument("--n-units-4",
                             type=int,
                             default=-1,
-                            help="list of number of units for the fourth ann layer (default: No second layer)")
+                            help="list of number of units for the fourth ann layer (default: No third layer)")
     parser.add_argument("--activation",
                             type=str,
                             choices=["relu", "linear", "sigmoid", "tanh"],
                             default="relu",
-                            help="list of number of units for the second rnn layer (default: No second layer)")
+                            help="list of number of units for the second rnn layer (default: No fourth layer)")
             
     args = parser.parse_args()
     return args
