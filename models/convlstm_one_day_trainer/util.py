@@ -5,34 +5,17 @@ import tensorflow as tf
 from google.cloud import storage
 from sklearn.model_selection import TimeSeriesSplit
 
-physical_devices = tf.config.list_physical_devices('GPU') 
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
-
-def make_dataset(data, labels, input_width, input_stride, sampling_rate, batch_size):
-    def split_window(features, input_width):
-        inputs = features[:, :input_width, :, :, :]
-        labels = features[:, input_width:, :, :, :]
-        inputs = inputs[:, :, :, :, :-1]
-        labels = labels[:, :, :, :, -1:]
-
-        inputs.set_shape([None, input_width, None, None, None])
-        labels = tf.reshape(labels, [tf.shape(features)[0], labels.shape[2], labels.shape[3], labels.shape[4]])
-        return inputs, labels
-    
-    data = np.concatenate((data, labels[:, :, :, np.newaxis]), axis=3)
-
-    ds = tf.keras.preprocessing.timeseries_dataset_from_array(
-        data=data,
-        targets=None,
-        sequence_length=input_width,
-        sequence_stride=input_stride,
-        sampling_rate=sampling_rate,
-        shuffle=True,
-        batch_size=batch_size)
-    
-    ds = ds.map(lambda x: split_window(x, input_width))
-    
-    return ds
+def convert_time_series_to_array(data, labels, seq_length, seq_stride, sampling_rate):
+    """Converts a time series dataset into a supervised learning problem"""
+    X = []
+    y = []
+    for i in range(0, len(data) - seq_length, seq_stride): # i tracks the start of the sequence, start at 0 move by stride
+        X.append(data[i:i + seq_length:sampling_rate]) # create sequences
+        y.append(labels[i + seq_length: i + seq_length + 1])
+    X = np.array(X) # shape is (samples, seq_length, features)
+    y = np.array(y) 
+    y = y.reshape(y.shape[0], y.shape[2], y.shape[3]) # shape is (samples, label_width, label_features) 
+    return X, y # return arr as numpy array
 
 def cross_validation(data, labels, model, n_splits, batch_size, epochs, metrics):
     """Performs time series walk-forward validation on data"""

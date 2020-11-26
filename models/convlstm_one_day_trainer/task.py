@@ -10,12 +10,15 @@ def train_lr(args):
     #load data
     features, labels = util.load_data(args.features_file, args.labels_file)
     features = features.reshape(features.shape[0], args.input_shape[0], args.input_shape[1], args.input_shape[2])
+    labels = labels.reshape(labels.shape[0], args.input_shape[0], args.input_shape[1])
     #convert time series data to supervised learning problem
-    features, labels = util.make_dataset(features, labels, args.input_width, args.input_stride, args.sampling_rate, args.batch_size)
+    features, labels = util.convert_time_series_to_array(features, labels, args.input_width, args.input_stride, args.sampling_rate)
+    features = features.astype(np.float32)
+    labels = labels.astype(np.float32)
     #initialize model
-    convlstm = tf.keras.models.Sequential([tf.keras.layers.ConvLSTM2D(filters=args.n_filters_1, kernel_size=args.kernel_size_1, padding='same', return_sequences=(args.n_filters_2 != -1))])
+    convlstm = tf.keras.models.Sequential([tf.keras.layers.ConvLSTM2D(filters=args.n_filters_1, activation='relu', kernel_size=args.kernel_size_1, padding='same', return_sequences=(args.n_filters_2 != -1))])
     if(args.n_filters_2 != -1):
-        convlstm.add(tf.keras.layers.ConvLSTM2D(filters=args.n_filters_2, padding='same', kernel_size=args.kernel_size_2))
+        convlstm.add(tf.keras.layers.ConvLSTM2D(filters=args.n_filters_2, activation='relu', padding='same', kernel_size=args.kernel_size_2))
     convlstm.add(tf.keras.layers.Conv2D(filters=1, activation='relu', padding='same', kernel_size=args.kernel_size_3))
     #compile model
     convlstm.compile(loss=args.loss, optimizer=args.optimizer)
@@ -63,7 +66,8 @@ def get_args():
                             help="path to labels file")
     parser.add_argument("--input-shape",
                             required=True,
-                            nargs="3",
+                            type=int,
+                            nargs=3,
                             help="shape of the input (grid_x, grid_y, num_features)")
     parser.add_argument("--cross-validation",
                             type=str2bool, 
