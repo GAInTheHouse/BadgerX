@@ -16,7 +16,7 @@ def train_lr(args):
     convlstm = tf.keras.models.Sequential([tf.keras.layers.ConvLSTM2D(filters=args.n_filters_1, kernel_size=args.kernel_size_1, padding='same', return_sequences=(args.n_filters_2 != -1))])
     if(args.n_filters_2 != -1):
         convlstm.add(tf.keras.layers.ConvLSTM2D(filters=args.n_filters_2, padding='same', kernel_size=args.kernel_size_2))
-    convlstm.add(tf.keras.layers.Conv2D(filters=1, activation='relu', kernel_size=args.kernel_size_3))
+    convlstm.add(tf.keras.layers.Conv2D(filters=1, activation='relu', padding='same', kernel_size=args.kernel_size_3))
     #compile model
     convlstm.compile(loss=args.loss, optimizer=args.optimizer)
     #initialize metrics
