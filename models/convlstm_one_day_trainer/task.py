@@ -1,9 +1,7 @@
 import numpy as np
-import pandas as pd
 import tensorflow as tf
 import argparse
 import util
-import joblib
 import hypertune
 
 def train_lr(args):
