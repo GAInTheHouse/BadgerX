@@ -6,22 +6,23 @@ import util
 import joblib
 import hypertune
 
-physical_devices = tf.config.list_physical_devices('GPU') 
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
-
 def train_lr(args):
     #load data
     features, labels = util.load_data(args.features_file, args.labels_file)
     #convert time series data to supervised learning problem
     features, labels = util.convert_time_series_to_array(features, labels, args.label_width, args.input_width, args.input_stride, args.sampling_rate)
+    features = features.reshape(features.shape[0], features.shape[1] * features.shape[2])
     labels = labels.reshape(labels.shape[0], labels.shape[1] * labels.shape[2])
     #initialize model
     ann = tf.keras.models.Sequential()
     ann.add(tf.keras.layers.Dense(args.n_units_1, activation=args.activation))
     if(args.n_units_2 != -1):
         ann.add(tf.keras.layers.Dense(args.n_units_2, activation=args.activation))
+    if(args.n_units_3 != -1):
+        ann.add(tf.keras.layers.Dense(args.n_units_3, activation=args.activation))
+    if(args.n_units_4 != -1):
+        ann.add(tf.keras.layers.Dense(args.n_units_4, activation=args.activation))
     ann.add(tf.keras.layers.Dense(labels.shape[1]))
-    print(ann.summary())
     #compile model
     ann.compile(loss=args.loss, optimizer=args.optimizer)
     #initialize metrics
@@ -112,16 +113,24 @@ def get_args():
     parser.add_argument("--n-units-1",
                             type=int,
                             default=64,
-                            help="list of number of units for the first rnn layer (default: 64)")
+                            help="list of number of units for the first ann layer (default: 64)")
     parser.add_argument("--n-units-2",
                             type=int,
                             default=-1,
-                            help="list of number of units for the second rnn layer (default: No second layer)")
+                            help="list of number of units for the second ann layer (default: No second layer)")
+    parser.add_argument("--n-units-3",
+                            type=int,
+                            default=-1,
+                            help="list of number of units for the third ann layer (default: No second layer)")
+    parser.add_argument("--n-units-4",
+                            type=int,
+                            default=-1,
+                            help="list of number of units for the fourth ann layer (default: No third layer)")
     parser.add_argument("--activation",
                             type=str,
-                            choice=["relu", "linear", "sigmoid", "tanh"],
+                            choices=["relu", "linear", "sigmoid", "tanh"],
                             default="relu",
-                            help="list of number of units for the second rnn layer (default: No second layer)")
+                            help="list of number of units for the second rnn layer (default: No fourth layer)")
             
     args = parser.parse_args()
     return args

@@ -6,9 +6,6 @@ import util
 import joblib
 import hypertune
 
-physical_devices = tf.config.list_physical_devices('GPU') 
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
-
 def train_lr(args):
     #load data
     features, labels = util.load_data(args.features_file, args.labels_file)
@@ -26,7 +23,6 @@ def train_lr(args):
         if(args.n_units_2 != -1):
             rnn.add(tf.keras.layers.GRU(args.n_units_2, dropout=args.dropout))
     rnn.add(tf.keras.layers.Dense(labels.shape[1]))
-    print(rnn.summary())
     #compile model
     rnn.compile(loss=args.loss, optimizer=args.optimizer)
     #initialize metrics

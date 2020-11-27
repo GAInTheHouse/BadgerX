@@ -22,7 +22,6 @@ def cross_validation(data, labels, model, n_splits, batch_size, epochs, metrics)
     tss = KFold(n_splits=n_splits) # make time series split object
     for train_idx, test_idx in tss.split(data, labels): # iterate through train test splits
         #train and validate models
-        print(data[train_idx].shape, labels[train_idx].shape)
         model.fit(data[train_idx], labels[train_idx], batch_size=batch_size, epochs=epochs)
         y_pred = model.predict(data[test_idx], batch_size=batch_size)
         metric_errors = [] # store errors based on each metric
@@ -37,11 +36,11 @@ def cross_validation(data, labels, model, n_splits, batch_size, epochs, metrics)
 def load_data(features_file, labels_file):
     """Load data from google cloud based on provided filenames"""
     # Download the files
-    bucket = storage.Client(project="projectx-294502").bucket("badgerx-model-training")
-    features_blob = bucket.blob(features_file)
-    labels_blob = bucket.blob(labels_file) 
-    features_blob.download_to_filename("features.h5")
-    labels_blob.download_to_filename("labels.h5")
+    # bucket = storage.Client(project="projectx-294502").bucket("badgerx-model-training")
+    # features_blob = bucket.blob(features_file)
+    # labels_blob = bucket.blob(labels_file) 
+    # features_blob.download_to_filename("features.h5")
+    # labels_blob.download_to_filename("labels.h5")
 
     # Read the downloaded hdf files
     features = pd.read_hdf("features.h5").values
