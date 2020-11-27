@@ -3,7 +3,7 @@ import pandas as pd
 import datetime
 import tensorflow as tf
 from google.cloud import storage
-from sklearn.model_selection import TimeSeriesSplit
+from sklearn.model_selection import KFold
 
 def convert_time_series_to_array(data, labels, label_width, seq_length, seq_stride, sampling_rate):
     """Converts a time series dataset into a supervised learning problem"""
@@ -19,7 +19,7 @@ def convert_time_series_to_array(data, labels, label_width, seq_length, seq_stri
 def cross_validation(data, labels, model, n_splits, batch_size, epochs, metrics):
     """Performs time series walk-forward validation on data"""
     errors = [] # store all the errors
-    tss = TimeSeriesSplit(n_splits=n_splits) # make time series split object
+    tss = KFold(n_splits=n_splits) # make time series split object
     for train_idx, test_idx in tss.split(data, labels): # iterate through train test splits
         #train and validate models
         model.fit(data[train_idx], labels[train_idx], batch_size=batch_size, epochs=epochs)
