@@ -18,8 +18,8 @@ def convert_time_series_to_array(data, labels, label_width, seq_length, seq_stri
 def cross_validation(data, labels, model, n_splits, metrics):
     """Performs time series walk-forward validation on data"""
     errors = [] # store all the errors
-    tss = KFold(n_splits=n_splits) # make time series split object
-    for train_idx, test_idx in tss.split(data, labels): # iterate through train test splits
+    kfold = KFold(n_splits=n_splits) # make time series split object
+    for train_idx, test_idx in kfold.split(data, labels): # iterate through train test splits
         #train and validate models
         model.fit(data[train_idx], labels[train_idx])
         y_pred = model.predict(data[test_idx])
