@@ -9,8 +9,8 @@ import hypertune
 def train_lr(args):
     #load data
     features, labels = util.load_data(args.features_file, args.labels_file)
-    features = features.reshape(features.shape[0], args.input_shape[0], args.input_shape[1], args.input_shape[2])
-    labels = labels.reshape(labels.shape[0], args.input_shape[0], args.input_shape[1])
+    features = features.reshape(features.shape[0], args.input_shape_1, args.input_shape_2, args.input_shape_3)
+    labels = labels.reshape(labels.shape[0], args.input_shape_1, args.input_shape_2)
     #convert time series data to supervised learning problem
     features, labels = util.convert_time_series_to_array(features, labels, args.input_width, args.input_stride, args.sampling_rate)
     features = features.astype(np.float32)
@@ -64,11 +64,18 @@ def get_args():
     parser.add_argument("--labels-file",
                             required=True,
                             help="path to labels file")
-    parser.add_argument("--input-shape",
+    parser.add_argument("--input-shape-1",
                             required=True,
                             type=int,
-                            nargs=3,
-                            help="shape of the input (grid_x, grid_y, num_features)")
+                            help="grid_X dimension of the input")
+    parser.add_argument("--input-shape-2",
+                            required=True,
+                            type=int,
+                            help="grid_Y dimension of the input")
+    parser.add_argument("--input-shape-3",
+                            required=True,
+                            type=int,
+                            help="num_featuresfeatures dimension of the input")
     parser.add_argument("--cross-validation",
                             type=str2bool, 
                             choices=["true", "false"],
