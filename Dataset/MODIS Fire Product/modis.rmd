@@ -1,0 +1,23 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, fig.show = 'hide')
+library(tidyverse)
+library(lubridate)
+## Note: this code assumes viridis.R and ggprob.R are in a directory named scripts
+##       which is two steps up the file directory tree
+## Edit as needed
+#source("../../scripts/viridis.R")
+#source("../../scripts/ggprob.R")
+```
+
+```{r}
+hi <- read_csv("modis_2018_United_States.csv")%>%
+  filter(satellite == "Terra" & latitude > 33.0 & latitude < 43.0 & longitude < -116.0 & longitude > -126.0
+) %>%
+  subset(select = c(latitude,	longitude,	brightness,	acq_date,	acq_time,	confidence,	bright_t31,	frp))
+
+write.csv(hi,"2018.csv")
+```
