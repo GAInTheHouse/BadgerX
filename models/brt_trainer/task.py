@@ -3,7 +3,8 @@ import pandas as pd
 import tensorflow as tf
 import argparse
 import util
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.experimental import enable_hist_gradient_boosting
+from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.multioutput import MultiOutputRegressor
 import joblib
 import hypertune
@@ -16,7 +17,7 @@ def train_brt(args):
     features = features.reshape(features.shape[0], features.shape[1] * features.shape[2])
     labels = labels.reshape(labels.shape[0], labels.shape[1] * labels.shape[2])
     #initialize model
-    brt = MultiOutputRegressor(GradientBoostingRegressor(learning_rate=args.learning_rate, n_estimators=args.n_estimators, subsample=args.subsample, max_depth=args.max_depth, verbose=1))
+    brt = MultiOutputRegressor(HistGradientBoostingRegressor(learning_rate=args.learning_rate, max_depth=args.max_depth, verbose=1))
     #initialize metrics
     metrics_names = ["RMSE"]
     metrics = [tf.metrics.RootMeanSquaredError()]

@@ -30,9 +30,11 @@ def train_lr(args):
         for i in range(len(metrics)):
             hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag=metrics_names[i], metric_value=err_means[i])
     else: #training for prediction
+        print("fitting")
         lr.fit(features, labels) #fit the model using all the data
-        joblib.dump(lr, args.model_name) #save the model file
-        util.save_model(args.model_dir, args.model_name) #upload the saved model to the cloud
+        print("saving")
+        joblib.dump(lr, args.model_name + '.tf') #save the model file
+        util.save_model(args.model_dir, args.model_name + '.tf') #upload the saved model to the cloud
         
 def get_args():
     def str2bool(v):

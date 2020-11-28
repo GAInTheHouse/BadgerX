@@ -30,6 +30,8 @@ def cross_validation(data, labels, model, n_splits, metrics):
             metric.reset_states() 
             metric.update_state(y_pred, labels[test_idx])
             metric_errors.append(metric.result().numpy())
+
+        print(metric_errors)
         errors.append(metric_errors)
     return np.array(errors)
 

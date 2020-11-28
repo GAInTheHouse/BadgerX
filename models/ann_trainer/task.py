@@ -22,7 +22,7 @@ def train_ann(args):
         ann.add(tf.keras.layers.Dense(args.n_units_3, activation=args.activation))
     if(args.n_units_4 != -1):
         ann.add(tf.keras.layers.Dense(args.n_units_4, activation=args.activation))
-    ann.add(tf.keras.layers.Dense(labels.shape[1]))
+    ann.add(tf.keras.layers.Dense(labels.lshape[1]))
     #compile model
     ann.compile(loss=args.loss, optimizer=args.optimizer)
     #initialize metrics
@@ -39,8 +39,8 @@ def train_ann(args):
             hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag=metrics_names[i], metric_value=err_means[i])
     else: #training for prediction
         ann.fit(features, labels, batch_size=args.batch_size, epochs=args.n_epochs) #fit the model using all the data
-        ann.save(args.model_name + ".h5")
-        util.save_model(args.model_dir, args.model_name + ".h5") #upload the saved model to the cloud
+        ann.save(args.model_name + ".tf")
+        util.save_model(args.model_dir, args.model_name + ".tf") #upload the saved model to the cloud
         
 def get_args():
     def str2bool(v):
