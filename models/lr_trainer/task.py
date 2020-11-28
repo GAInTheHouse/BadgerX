@@ -16,7 +16,7 @@ def train_lr(args):
     features = features.reshape(features.shape[0], features.shape[1] * features.shape[2])
     labels = labels.reshape(labels.shape[0], labels.shape[1] * labels.shape[2])
     #initialize model
-    lr = MultiOutputRegressor(LinearRegression())
+    lr = MultiOutputRegressor(LinearRegression(n_jobs=-1))
     #initialize metrics
     metrics_names = ["RMSE"]
     metrics = [tf.metrics.RootMeanSquaredError()]
