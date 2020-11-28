@@ -4,7 +4,7 @@ import argparse
 import util
 import hypertune
 
-def train_lr(args):
+def train_convlstm(args):
     #load data
     features, labels = util.load_data(args.features_file, args.labels_file)
     features = features.reshape(features.shape[0], args.input_shape_1, args.input_shape_2, args.input_shape_3)
@@ -34,6 +34,7 @@ def train_lr(args):
             hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag=metrics_names[i], metric_value=err_means[i])
     else: #training for prediction
         convlstm.fit(features, labels, batch_size=args.batch_size, epochs=args.n_epochs) #fit the model using all the data
+        print(convlstm.predict(features))
         convlstm.save(args.model_name + ".h5")
         util.save_model(args.model_dir, args.model_name + ".h5") #upload the saved model to the cloud
         
@@ -76,7 +77,6 @@ def get_args():
                             help="num_featuresfeatures dimension of the input")
     parser.add_argument("--cross-validation",
                             type=str2bool, 
-                            choices=["true", "false"],
                             default=True,
                             help="whether to do cross validation or not (default: True)")
     parser.add_argument("--n-splits",
@@ -144,7 +144,7 @@ def get_args():
 
 def main():
     args = get_args()
-    train_lr(args)
+    train_convlstm(args)
 
 if __name__ == "__main__":
     main()

@@ -6,7 +6,7 @@ import util
 import joblib
 import hypertune
 
-def train_lr(args):
+def train_ann(args):
     #load data
     features, labels = util.load_data(args.features_file, args.labels_file)
     #convert time series data to supervised learning problem
@@ -69,7 +69,6 @@ def get_args():
                             help="path to labels file")
     parser.add_argument("--cross-validation",
                             type=str2bool, 
-                            choices=["true", "false"],
                             default=True,
                             help="whether to do cross validation or not (default: True)")
     parser.add_argument("--n-splits",
@@ -138,7 +137,7 @@ def get_args():
 
 def main():
     args = get_args()
-    train_lr(args)
+    train_ann(args)
 
 if __name__ == "__main__":
     main()

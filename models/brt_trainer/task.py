@@ -8,7 +8,7 @@ from sklearn.multioutput import MultiOutputRegressor
 import joblib
 import hypertune
 
-def train_lr(args):
+def train_brt(args):
     #load data
     features, labels = util.load_data(args.features_file, args.labels_file)
     #convert time series data to supervised learning problem
@@ -16,13 +16,13 @@ def train_lr(args):
     features = features.reshape(features.shape[0], features.shape[1] * features.shape[2])
     labels = labels.reshape(labels.shape[0], labels.shape[1] * labels.shape[2])
     #initialize model
-    lr = MultiOutputRegressor(GradientBoostingRegressor(learning_rate=args.learning_rate, n_estimators=args.n_estimators, subsample=args.subsample, max_depth=args.max_depth, verbose=1))
+    brt = MultiOutputRegressor(GradientBoostingRegressor(learning_rate=args.learning_rate, n_estimators=args.n_estimators, subsample=args.subsample, max_depth=args.max_depth, verbose=1))
     #initialize metrics
     metrics_names = ["RMSE"]
     metrics = [tf.metrics.RootMeanSquaredError()]
     #determine if tuning or training final model
     if(args.cross_validation): #tuning using cross validation
-        errors = util.cross_validation(features, labels, lr, args.n_splits, metrics) #get the errors from the CV
+        errors = util.cross_validation(features, labels, brt, args.n_splits, metrics) #get the errors from the CV
         err_means = errors.mean(axis=0) #get means
         #output mean error to of each metric for hypertuning
         print(err_means)
@@ -30,8 +30,8 @@ def train_lr(args):
         for i in range(len(metrics)):
             hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag=metrics_names[i], metric_value=err_means[i])
     else: #training for prediction
-        lr.fit(features, labels) #fit the model using all the data
-        joblib.dump(lr, args.model_name) #save the model file
+        brt.fit(features, labels) #fit the model using all the data
+        joblib.dump(brt, args.model_name) #save the model file
         util.save_model(args.model_dir, args.model_name) #upload the saved model to the cloud
         
 def get_args():
@@ -57,7 +57,6 @@ def get_args():
                             help="path to labels file")
     parser.add_argument("--cross-validation",
                             type=str2bool, 
-                            choices=["true", "false"],
                             default=True,
                             help="whether to do cross validation or not (default: True)")
     parser.add_argument("--n-splits",
@@ -102,7 +101,7 @@ def get_args():
 
 def main():
     args = get_args()
-    train_lr(args)
+    train_brt(args)
 
 if __name__ == "__main__":
     main()

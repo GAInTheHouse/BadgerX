@@ -35,11 +35,11 @@ def cross_validation(data, labels, model, n_splits, metrics):
 def load_data(features_file, labels_file):
     """Load data from google cloud based on provided filenames"""
     # Download the files
-    bucket = storage.Client(project="projectx-294502").bucket("badgerx-model-training")
-    features_blob = bucket.blob(features_file)
-    labels_blob = bucket.blob(labels_file) 
-    features_blob.download_to_filename("features.h5")
-    labels_blob.download_to_filename("labels.h5")
+    # bucket = storage.Client(project="projectx-294502").bucket("badgerx-model-training")
+    # features_blob = bucket.blob(features_file)
+    # labels_blob = bucket.blob(labels_file) 
+    # features_blob.download_to_filename("features.h5")
+    # labels_blob.download_to_filename("labels.h5")
 
     # Read the downloaded hdf files
     features = pd.read_hdf("features.h5").values
