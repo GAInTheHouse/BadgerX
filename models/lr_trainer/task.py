@@ -57,7 +57,6 @@ def get_args():
                             help="path to labels file")
     parser.add_argument("--cross-validation",
                             type=str2bool, 
-                            choices=["true", "false"],
                             default=True,
                             help="whether to do cross validation or not (default: True)")
     parser.add_argument("--n-splits",
