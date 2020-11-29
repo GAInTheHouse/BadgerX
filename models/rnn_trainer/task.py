@@ -4,7 +4,10 @@ import tensorflow as tf
 import argparse
 import util
 import joblib
-import hypertune
+#import hypertune
+
+physical_devices=tf.config.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 def train_lr(args):
     #load data
@@ -12,35 +15,24 @@ def train_lr(args):
     #convert time series data to supervised learning problem
     features, labels = util.convert_time_series_to_array(features, labels, args.label_width, args.input_width, args.input_stride, args.sampling_rate)
     labels = labels.reshape(labels.shape[0], labels.shape[1] * labels.shape[2])
-    #initialize model
-    rnn = tf.keras.models.Sequential()
-    if(args.cell_type == 'lstm'):
-        rnn.add(tf.keras.layers.LSTM(args.n_units_1, dropout=args.dropout, return_sequences=(args.n_units_2 != -1), input_shape=(features.shape[1], features.shape[2])))
-        if(args.n_units_2 != -1):
-            rnn.add(tf.keras.layers.LSTM(args.n_units_2, dropout=args.dropout))
-    elif(args.cell_type == 'gru'):
-        rnn.add(tf.keras.layers.GRU(args.n_units_1, dropout=args.dropout, return_sequences=(args.n_units_2 != -1), input_shape=(features.shape[1], features.shape[2])))
-        if(args.n_units_2 != -1):
-            rnn.add(tf.keras.layers.GRU(args.n_units_2, dropout=args.dropout))
-    rnn.add(tf.keras.layers.Dense(labels.shape[1]))
-    #compile model
-    rnn.compile(loss=args.loss, optimizer=args.optimizer)
+
     #initialize metrics
     metrics_names = ["RMSE"]
     metrics = [tf.metrics.RootMeanSquaredError()]
     #determine if tuning or training final model
     if(args.cross_validation): #tuning using cross validation
-        errors = util.cross_validation(features, labels, rnn, args.n_splits, args.batch_size, args.n_epochs, metrics) #get the errors from the CV
+        errors = util.cross_validation(features, labels, args, metrics) #get the errors from the CV
         err_means = errors.mean(axis=0) #get means
         #output mean error to of each metric for hypertuning
         print(err_means)
-        hpt = hypertune.HyperTune() 
-        for i in range(len(metrics)):
-            hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag=metrics_names[i], metric_value=err_means[i])
+        # hpt = hypertune.HyperTune() 
+        # for i in range(len(metrics)):
+        #     hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag=metrics_names[i], metric_value=err_means[i])
     else: #training for prediction
+        rnn = util.build_model(args, labels.shape)
         rnn.fit(features, labels, batch_size=args.batch_size, epochs=args.n_epochs) #fit the model using all the data
         rnn.save(args.model_name + ".h5")
-        util.save_model(args.model_dir, args.model_name + ".h5") #upload the saved model to the cloud
+        #util.save_model(args.model_dir, args.model_name + ".h5") #upload the saved model to the cloud
         
 def get_args():
     def str2bool(v):

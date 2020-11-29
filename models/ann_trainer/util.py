@@ -16,14 +16,29 @@ def convert_time_series_to_array(data, labels, label_width, seq_length, seq_stri
     y = np.array(y) # shape is (samples, label_width, label_features) 
     return X, y # return arr as numpy array
 
-def cross_validation(data, labels, model, n_splits, batch_size, epochs, metrics):
+def build_model(args, labels_shape):
+    ann = tf.keras.models.Sequential()
+    ann.add(tf.keras.layers.Dense(args.n_units_1, activation=args.activation))
+    if(args.n_units_2 != -1):
+        ann.add(tf.keras.layers.Dense(args.n_units_2, activation=args.activation))
+    if(args.n_units_3 != -1):
+        ann.add(tf.keras.layers.Dense(args.n_units_3, activation=args.activation))
+    if(args.n_units_4 != -1):
+        ann.add(tf.keras.layers.Dense(args.n_units_4, activation=args.activation))
+    ann.add(tf.keras.layers.Dense(labels_shape[1]))
+    ann.compile(loss=args.loss, optimizer=args.optimizer)
+    return ann
+
+def cross_validation(data, labels, args, metrics):
     """Performs time series walk-forward validation on data"""
     errors = [] # store all the errors
-    kfold = KFold(n_splits=n_splits) # make time series split object
+    kfold = KFold(n_splits=args.n_splits) # make time series split object
     for train_idx, test_idx in kfold.split(data, labels): # iterate through train test splits
         #train and validate models
-        model.fit(data[train_idx], labels[train_idx], batch_size=batch_size, epochs=epochs)
-        y_pred = model.predict(data[test_idx], batch_size=batch_size)
+        tf.keras.backend.clear_session()
+        model = build_model(args, labels.shape) 
+        model.fit(data[train_idx], labels[train_idx], batch_size=args.batch_size, epochs=args.n_epochs)
+        y_pred = model.predict(data[test_idx], batch_size=args.batch_size)
         metric_errors = [] # store errors based on each metric
         for metric in metrics: # iterate through metrics
             # MUST USE tf.metrics OR CHANGE CODE
@@ -31,20 +46,21 @@ def cross_validation(data, labels, model, n_splits, batch_size, epochs, metrics)
             metric.update_state(y_pred, labels[test_idx])
             metric_errors.append(metric.result().numpy())
         errors.append(metric_errors)
+        print(errors)
     return np.array(errors)
-
+    
 def load_data(features_file, labels_file):
     """Load data from google cloud based on provided filenames"""
     # Download the files
-    bucket = storage.Client(project="projectx-294502").bucket("badgerx-model-training")
-    features_blob = bucket.blob(features_file)
-    labels_blob = bucket.blob(labels_file) 
-    features_blob.download_to_filename("features.h5")
-    labels_blob.download_to_filename("labels.h5")
+    # bucket = storage.Client(project="projectx-294502").bucket("badgerx-model-training")
+    # features_blob = bucket.blob(features_file)
+    # labels_blob = bucket.blob(labels_file) 
+    # features_blob.download_to_filename("features.h5")
+    # labels_blob.download_to_filename("labels.h5")
 
     # Read the downloaded hdf files
-    features = pd.read_hdf("features.h5").values
-    labels = pd.read_hdf("labels.h5").values
+    features = pd.read_hdf(features_file).values
+    labels = pd.read_hdf(labels_file).values
 
     return features, labels
 

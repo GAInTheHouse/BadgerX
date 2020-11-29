@@ -14,23 +14,13 @@ def train_ann(args):
     features = features.reshape(features.shape[0], features.shape[1] * features.shape[2])
     labels = labels.reshape(labels.shape[0], labels.shape[1] * labels.shape[2])
     #initialize model
-    ann = tf.keras.models.Sequential()
-    ann.add(tf.keras.layers.Dense(args.n_units_1, activation=args.activation))
-    if(args.n_units_2 != -1):
-        ann.add(tf.keras.layers.Dense(args.n_units_2, activation=args.activation))
-    if(args.n_units_3 != -1):
-        ann.add(tf.keras.layers.Dense(args.n_units_3, activation=args.activation))
-    if(args.n_units_4 != -1):
-        ann.add(tf.keras.layers.Dense(args.n_units_4, activation=args.activation))
-    ann.add(tf.keras.layers.Dense(labels.lshape[1]))
-    #compile model
-    ann.compile(loss=args.loss, optimizer=args.optimizer)
+    
     #initialize metrics
     metrics_names = ["RMSE"]
     metrics = [tf.metrics.RootMeanSquaredError()]
     #determine if tuning or training final model
     if(args.cross_validation): #tuning using cross validation
-        errors = util.cross_validation(features, labels, ann, args.n_splits, args.batch_size, args.n_epochs, metrics) #get the errors from the CV
+        errors = util.cross_validation(features, labels, args, metrics) #get the errors from the CV
         err_means = errors.mean(axis=0) #get means
         #output mean error to of each metric for hypertuning
         print(err_means)
@@ -38,6 +28,7 @@ def train_ann(args):
         for i in range(len(metrics)):
             hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag=metrics_names[i], metric_value=err_means[i])
     else: #training for prediction
+        ann = util.build_model(args, labels.shape)
         ann.fit(features, labels, batch_size=args.batch_size, epochs=args.n_epochs) #fit the model using all the data
         ann.save(args.model_name + ".tf")
         util.save_model(args.model_dir, args.model_name + ".tf") #upload the saved model to the cloud

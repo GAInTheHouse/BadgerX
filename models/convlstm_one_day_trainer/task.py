@@ -2,7 +2,10 @@ import numpy as np
 import tensorflow as tf
 import argparse
 import util
-import hypertune
+#import hypertune
+
+physical_devices=tf.config.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 def train_convlstm(args):
     #load data
@@ -13,13 +16,6 @@ def train_convlstm(args):
     features, labels = util.convert_time_series_to_array(features, labels, args.input_width, args.input_stride, args.sampling_rate)
     features = features.astype(np.float32)
     labels = labels.astype(np.float32)
-    #initialize model
-    convlstm = tf.keras.models.Sequential([tf.keras.layers.ConvLSTM2D(filters=args.n_filters_1, activation='relu', kernel_size=args.kernel_size_1, padding='same', return_sequences=(args.n_filters_2 != -1))])
-    if(args.n_filters_2 != -1):
-        convlstm.add(tf.keras.layers.ConvLSTM2D(filters=args.n_filters_2, activation='relu', padding='same', kernel_size=args.kernel_size_2))
-    convlstm.add(tf.keras.layers.Conv2D(filters=1, activation='relu', padding='same', kernel_size=args.kernel_size_3))
-    #compile model
-    convlstm.compile(loss=args.loss, optimizer=args.optimizer)
     #initialize metrics
     metrics_names = ["RMSE"]
     metrics = [tf.metrics.RootMeanSquaredError()]
@@ -29,14 +25,15 @@ def train_convlstm(args):
         err_means = errors.mean(axis=0) #get means
         #output mean error to of each metric for hypertuning
         print(err_means)
-        hpt = hypertune.HyperTune() 
-        for i in range(len(metrics)):
-            hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag=metrics_names[i], metric_value=err_means[i])
+        # hpt = hypertune.HyperTune() 
+        # for i in range(len(metrics)):
+        #     hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag=metrics_names[i], metric_value=err_means[i])
     else: #training for prediction
+        convlstm=util.build_model(args, labels.shape)
         convlstm.fit(features, labels, batch_size=args.batch_size, epochs=args.n_epochs) #fit the model using all the data
         print(convlstm.predict(features))
         convlstm.save(args.model_name + ".h5")
-        util.save_model(args.model_dir, args.model_name + ".h5") #upload the saved model to the cloud
+        #util.save_model(args.model_dir, args.model_name + ".h5") #upload the saved model to the cloud
         
 def get_args():
     def str2bool(v):
