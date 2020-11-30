@@ -3,10 +3,10 @@ import pandas as pd
 import tensorflow as tf
 import argparse
 import util
-import joblib
 import hypertune
 
 def train_ann(args):
+    """Trains the model using cross validation or saves it"""
     #load data
     features, labels = util.load_data(args.features_file, args.labels_file)
     #convert time series data to supervised learning problem
@@ -30,10 +30,11 @@ def train_ann(args):
     else: #training for prediction
         ann = util.build_model(args, labels.shape)
         ann.fit(features, labels, batch_size=args.batch_size, epochs=args.n_epochs) #fit the model using all the data
-        ann.save(args.model_name + ".tf")
-        util.save_model(args.model_dir, args.model_name + ".tf") #upload the saved model to the cloud
+        ann.save(args.model_name + ".h5")
+        #util.save_model(args.model_dir, args.model_name + ".tf") #upload the saved model to the cloud
         
 def get_args():
+    """Parses the arguments from command line"""
     def str2bool(v):
         if isinstance(v, bool):
             return v

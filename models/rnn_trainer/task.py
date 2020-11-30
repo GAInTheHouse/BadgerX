@@ -4,12 +4,9 @@ import tensorflow as tf
 import argparse
 import util
 import joblib
-#import hypertune
+import hypertune
 
-physical_devices=tf.config.list_physical_devices('GPU')
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
-
-def train_lr(args):
+def train_rnn(args):
     #load data
     features, labels = util.load_data(args.features_file, args.labels_file)
     #convert time series data to supervised learning problem
@@ -24,17 +21,19 @@ def train_lr(args):
         errors = util.cross_validation(features, labels, args, metrics) #get the errors from the CV
         err_means = errors.mean(axis=0) #get means
         #output mean error to of each metric for hypertuning
-        print(err_means)
-        # hpt = hypertune.HyperTune() 
-        # for i in range(len(metrics)):
-        #     hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag=metrics_names[i], metric_value=err_means[i])
+        with open(args.model_name + ".txt", "a") as output_file:
+            output_file.write(str(err_means) + "\n")
+        hpt = hypertune.HyperTune() 
+        for i in range(len(metrics)):
+            hpt.report_hyperparameter_tuning_metric(hyperparameter_metric_tag=metrics_names[i], metric_value=err_means[i])
     else: #training for prediction
         rnn = util.build_model(args, labels.shape)
         rnn.fit(features, labels, batch_size=args.batch_size, epochs=args.n_epochs) #fit the model using all the data
         rnn.save(args.model_name + ".h5")
-        #util.save_model(args.model_dir, args.model_name + ".h5") #upload the saved model to the cloud
+        util.save_model(args.model_dir, args.model_name + ".h5") #upload the saved model to the cloud
         
 def get_args():
+    """Parse arguments from command line"""
     def str2bool(v):
         if isinstance(v, bool):
             return v
@@ -125,7 +124,7 @@ def get_args():
 
 def main():
     args = get_args()
-    train_lr(args)
+    train_rnn(args)
 
 if __name__ == "__main__":
     main()

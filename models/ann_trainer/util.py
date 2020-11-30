@@ -17,6 +17,7 @@ def convert_time_series_to_array(data, labels, label_width, seq_length, seq_stri
     return X, y # return arr as numpy array
 
 def build_model(args, labels_shape):
+    """Builds an ANN based off of CLA args"""
     ann = tf.keras.models.Sequential()
     ann.add(tf.keras.layers.Dense(args.n_units_1, activation=args.activation))
     if(args.n_units_2 != -1):
@@ -30,7 +31,7 @@ def build_model(args, labels_shape):
     return ann
 
 def cross_validation(data, labels, args, metrics):
-    """Performs time series walk-forward validation on data"""
+    """Performs cross validation on data"""
     errors = [] # store all the errors
     kfold = KFold(n_splits=args.n_splits) # make time series split object
     for train_idx, test_idx in kfold.split(data, labels): # iterate through train test splits
@@ -52,11 +53,11 @@ def cross_validation(data, labels, args, metrics):
 def load_data(features_file, labels_file):
     """Load data from google cloud based on provided filenames"""
     # Download the files
-    # bucket = storage.Client(project="projectx-294502").bucket("badgerx-model-training")
-    # features_blob = bucket.blob(features_file)
-    # labels_blob = bucket.blob(labels_file) 
-    # features_blob.download_to_filename("features.h5")
-    # labels_blob.download_to_filename("labels.h5")
+    bucket = storage.Client(project="projectx-294502").bucket("badgerx-model-training")
+    features_blob = bucket.blob(features_file)
+    labels_blob = bucket.blob(labels_file) 
+    features_blob.download_to_filename("features.h5")
+    labels_blob.download_to_filename("labels.h5")
 
     # Read the downloaded hdf files
     features = pd.read_hdf(features_file).values
