@@ -4,7 +4,7 @@ Official Repository Maintained By BadgerX team representing The University Of Wi
 
 ## Team:
 
-- Elliot Kim
+- Eliot Kim
 - Gautam Agarwal
 - Collin Frink
 - Brian Hu
