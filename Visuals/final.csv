@@ -1,0 +1,10 @@
+model,param,rmse
+rnn,pca,0.2315455
+rnn,ae5000,0.22882414
+rnn,ae2500,0.2299298
+2 Layer ann,pca,0.26389298
+2 Layer ann,ae5000,0.22755119
+2 Layer ann,ae2500,0.23606591
+4 Layer ann,pca,0.23240201
+4 Layer ann,ae5000,0.24598943
+4 Layer ann,ae2500,0.2284084
